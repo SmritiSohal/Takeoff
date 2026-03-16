@@ -25,8 +25,8 @@ export default function ModuleLayout({
   const { user, signOut } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
 
-  const handleSignOut = () => {
-    signOut();
+  const handleSignOut = async () => {
+    await signOut();
     navigate('/auth');
   };
 
