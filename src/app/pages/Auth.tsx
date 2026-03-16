@@ -9,12 +9,14 @@ export default function Auth() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
   const { signIn, signUp } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setError(null);
 
     try {
       if (isSignUp) {
@@ -24,6 +26,8 @@ export default function Auth() {
       }
       navigate('/dashboard');
     } catch (error) {
+      const message = error instanceof Error ? error.message : 'Authentication failed. Please try again.';
+      setError(message);
       console.error('Authentication error:', error);
     } finally {
       setLoading(false);
@@ -204,6 +208,8 @@ export default function Auth() {
                   </button>
                 </div>
               )}
+
+              {error && <p className="text-sm text-red-600 text-center">{error}</p>}
 
               <button
                 type="submit"

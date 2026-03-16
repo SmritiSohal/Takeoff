@@ -1,4 +1,5 @@
-import { createContext, useContext, useState, ReactNode } from 'react';
+import { createContext, useContext, ReactNode } from 'react';
+import { useAuth } from './AuthContext';
 
 type PremiumContent = {
   eligibilityPlanner: boolean;
@@ -10,40 +11,34 @@ type PremiumContent = {
 
 type PremiumContextType = {
   premiumAccess: PremiumContent;
-  unlockContent: (content: keyof PremiumContent) => void;
-  unlockAll: () => void;
+  unlockContent: () => Promise<void>;
+  unlockAll: () => Promise<void>;
 };
 
 const PremiumContext = createContext<PremiumContextType | undefined>(undefined);
 
 export function PremiumProvider({ children }: { children: ReactNode }) {
-  const [premiumAccess, setPremiumAccess] = useState<PremiumContent>({
-    eligibilityPlanner: false,
-    paperworkGuides: false,
-    medicalResources: false,
-    examPrep: false,
-    schoolDatabase: false,
-  });
+  const { user, refreshUser } = useAuth();
 
-  const unlockContent = (content: keyof PremiumContent) => {
-    setPremiumAccess((prev) => ({ ...prev, [content]: true }));
+  const isPremium = !!user?.isPremium;
+
+  const premiumAccess: PremiumContent = {
+    eligibilityPlanner: isPremium,
+    paperworkGuides: isPremium,
+    medicalResources: isPremium,
+    examPrep: isPremium,
+    schoolDatabase: isPremium,
   };
 
-  const unlockAll = () => {
-    setPremiumAccess({
-      eligibilityPlanner: true,
-      paperworkGuides: true,
-      medicalResources: true,
-      examPrep: true,
-      schoolDatabase: true,
-    });
+  const unlockContent = async () => {
+    await refreshUser();
   };
 
-  return (
-    <PremiumContext.Provider value={{ premiumAccess, unlockContent, unlockAll }}>
-      {children}
-    </PremiumContext.Provider>
-  );
+  const unlockAll = async () => {
+    await refreshUser();
+  };
+
+  return <PremiumContext.Provider value={{ premiumAccess, unlockContent, unlockAll }}>{children}</PremiumContext.Provider>;
 }
 
 export function usePremium() {
