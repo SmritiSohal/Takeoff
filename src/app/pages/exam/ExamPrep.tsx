@@ -215,12 +215,8 @@ export default function ExamPrep() {
 
       <UnlockModal
         isOpen={showUnlockModal}
-        onClose={() => {
-          setShowUnlockModal(false);
-          if (premiumAccess.examPrep) {
-            navigate('/exam-prep/resources');
-          }
-        }}
+        onClose={() => setShowUnlockModal(false)}
+        onUnlockSuccess={() => navigate('/exam-prep/resources')}
         contentType="examPrep"
         title="Unlock Exam Preparation Resources"
         features={[

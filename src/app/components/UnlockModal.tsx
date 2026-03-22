@@ -2,23 +2,17 @@ import { useState } from 'react';
 import { X, Check, Sparkles } from 'lucide-react';
 import { usePremium } from '../contexts/PremiumContext';
 import { useAuth } from '../contexts/AuthContext';
-import { createPremiumOrder, verifyPremiumPayment } from '../lib/supabase';
-
-declare global {
-  interface Window {
-    Razorpay?: new (options: Record<string, unknown>) => { open: () => void };
-  }
-}
 
 type UnlockModalProps = {
   isOpen: boolean;
   onClose: () => void;
+  onUnlockSuccess?: () => void;
   contentType: 'eligibilityPlanner' | 'paperworkGuides' | 'medicalResources' | 'examPrep' | 'schoolDatabase';
   title: string;
   features: string[];
 };
 
-export default function UnlockModal({ isOpen, onClose, title }: UnlockModalProps) {
+export default function UnlockModal({ isOpen, onClose, onUnlockSuccess, title }: UnlockModalProps) {
   const { unlockContent } = usePremium();
   const { accessToken, user } = useAuth();
   const [isUnlocking, setIsUnlocking] = useState(false);
@@ -46,6 +40,9 @@ export default function UnlockModal({ isOpen, onClose, title }: UnlockModalProps
     setTimeout(() => {
       setIsUnlocked(false);
       onClose();
+      if (onUnlockSuccess) {
+        onUnlockSuccess();
+      }
     }, 1200);
   };
 
@@ -59,40 +56,9 @@ export default function UnlockModal({ isOpen, onClose, title }: UnlockModalProps
     setIsUnlocking(true);
 
     try {
-      const order = await createPremiumOrder(accessToken);
-      const razorpay = window.Razorpay;
-
-      if (!razorpay) {
-        setError('Razorpay SDK is not loaded. Add checkout script and retry.');
-        setIsUnlocking(false);
-        return;
-      }
-
-      const modal = new razorpay({
-        key: order.keyId,
-        amount: order.amount,
-        currency: order.currency,
-        name: 'TakeOff Premium',
-        description: 'One-time premium unlock',
-        order_id: order.orderId,
-        prefill: {
-          name: user.name,
-          email: user.email,
-        },
-        handler: async (response: { razorpay_order_id: string; razorpay_payment_id: string; razorpay_signature: string }) => {
-          try {
-            await verifyPremiumPayment(accessToken, response);
-            await completeUnlock();
-          } catch (verificationError) {
-            setError(verificationError instanceof Error ? verificationError.message : 'Payment verification failed.');
-            setIsUnlocking(false);
-          }
-        },
-      });
-
-      modal.open();
-    } catch (paymentError) {
-      setError(paymentError instanceof Error ? paymentError.message : 'Unable to initiate payment at the moment.');
+      await completeUnlock();
+    } catch (unlockError) {
+      setError(unlockError instanceof Error ? unlockError.message : 'Unable to unlock premium features.');
       setIsUnlocking(false);
     }
   };
@@ -130,13 +96,6 @@ export default function UnlockModal({ isOpen, onClose, title }: UnlockModalProps
               ))}
             </div>
 
-            <div className="bg-gray-50 rounded-2xl p-6 mb-6">
-              <div className="text-center">
-                <p className="text-[#626262] font-['Inter',sans-serif] text-sm mb-2">One-time payment</p>
-                <span className="font-['Inter',sans-serif] font-bold text-4xl text-black">₹1,999</span>
-              </div>
-            </div>
-
             {error && <p className="mb-4 text-sm text-red-600 text-center">{error}</p>}
 
             <button
@@ -152,7 +111,7 @@ export default function UnlockModal({ isOpen, onClose, title }: UnlockModalProps
               ) : (
                 <>
                   <Sparkles className="w-5 h-5" />
-                  Unlock with Razorpay
+                  Unlock Premium Content
                 </>
               )}
             </button>

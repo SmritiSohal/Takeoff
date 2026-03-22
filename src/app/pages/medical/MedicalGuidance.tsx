@@ -176,12 +176,8 @@ export default function MedicalGuidance() {
 
       <UnlockModal
         isOpen={showUnlockModal}
-        onClose={() => {
-          setShowUnlockModal(false);
-          if (premiumAccess.medicalResources) {
-            navigate('/medical/resources');
-          }
-        }}
+        onClose={() => setShowUnlockModal(false)}
+        onUnlockSuccess={() => navigate('/medical/resources')}
         contentType="medicalResources"
         title="Unlock Medical Resources"
         features={[

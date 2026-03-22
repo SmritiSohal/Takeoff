@@ -165,12 +165,8 @@ export default function PaperworkHub() {
 
       <UnlockModal
         isOpen={showUnlockModal}
-        onClose={() => {
-          setShowUnlockModal(false);
-          if (premiumAccess.paperworkGuides) {
-            navigate('/paperwork/egca-guides');
-          }
-        }}
+        onClose={() => setShowUnlockModal(false)}
+        onUnlockSuccess={() => navigate('/paperwork/egca-guides')}
         contentType="paperworkGuides"
         title="Unlock eGCA Portal Guides"
         features={[

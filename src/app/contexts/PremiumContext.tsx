@@ -1,5 +1,6 @@
 import { createContext, useContext, ReactNode } from 'react';
 import { useAuth } from './AuthContext';
+import { updatePremiumStatus } from '../lib/supabase';
 
 type PremiumContent = {
   eligibilityPlanner: boolean;
@@ -18,7 +19,7 @@ type PremiumContextType = {
 const PremiumContext = createContext<PremiumContextType | undefined>(undefined);
 
 export function PremiumProvider({ children }: { children: ReactNode }) {
-  const { user, refreshUser } = useAuth();
+  const { user, refreshUser, accessToken } = useAuth();
 
   const isPremium = !!user?.isPremium;
 
@@ -31,11 +32,27 @@ export function PremiumProvider({ children }: { children: ReactNode }) {
   };
 
   const unlockContent = async () => {
-    await refreshUser();
+    if (!user?.id || !accessToken) return;
+    
+    try {
+      await updatePremiumStatus(accessToken, user.id, true);
+      await refreshUser();
+    } catch (error) {
+      console.error('Failed to unlock premium content:', error);
+      throw error;
+    }
   };
 
   const unlockAll = async () => {
-    await refreshUser();
+    if (!user?.id || !accessToken) return;
+    
+    try {
+      await updatePremiumStatus(accessToken, user.id, true);
+      await refreshUser();
+    } catch (error) {
+      console.error('Failed to unlock all premium content:', error);
+      throw error;
+    }
   };
 
   return <PremiumContext.Provider value={{ premiumAccess, unlockContent, unlockAll }}>{children}</PremiumContext.Provider>;

@@ -82,7 +82,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const result = await signUpWithEmail(email, password, name);
 
     if (!result.session) {
-      throw new Error('Signup successful. Please verify your email before signing in.');
+      throw new Error('Sign in to continue');
     }
 
     saveSession(result.session);

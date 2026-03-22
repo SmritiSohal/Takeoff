@@ -407,12 +407,8 @@ export default function FlyingSchools() {
 
       <UnlockModal
         isOpen={showUnlockModal}
-        onClose={() => {
-          setShowUnlockModal(false);
-          if (premiumAccess.schoolDatabase) {
-            navigate('/flying-schools/database');
-          }
-        }}
+        onClose={() => setShowUnlockModal(false)}
+        onUnlockSuccess={() => navigate('/flying-schools/database')}
         contentType="schoolDatabase"
         title="Unlock School Database"
         features={[

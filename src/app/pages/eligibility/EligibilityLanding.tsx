@@ -116,12 +116,8 @@ export default function EligibilityLanding() {
 
       <UnlockModal
         isOpen={showUnlockModal}
-        onClose={() => {
-          setShowUnlockModal(false);
-          if (premiumAccess.eligibilityPlanner) {
-            navigate('/eligibility/financial-planner');
-          }
-        }}
+        onClose={() => setShowUnlockModal(false)}
+        onUnlockSuccess={() => navigate('/eligibility/financial-planner')}
         contentType="eligibilityPlanner"
         title="Unlock Financial Planner"
         features={[

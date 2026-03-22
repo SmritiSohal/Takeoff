@@ -123,6 +123,19 @@ export async function upsertProfile(accessToken: string, payload: { id: string; 
   });
 }
 
+export async function updatePremiumStatus(accessToken: string, userId: string, isPremium: boolean) {
+  await request(`/rest/v1/users?id=eq.${userId}`, {
+    method: 'PATCH',
+    headers: {
+      ...authHeaders(accessToken),
+      Prefer: 'return=minimal',
+    },
+    body: JSON.stringify({
+      is_premium: isPremium,
+    }),
+  });
+}
+
 export async function fetchSchools(accessToken: string) {
   return request<Array<Record<string, unknown>>>(
     '/rest/v1/schools?select=*&order=rating.desc.nullslast,name.asc',
