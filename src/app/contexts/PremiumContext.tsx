@@ -33,7 +33,8 @@ export function PremiumProvider({ children }: { children: ReactNode }) {
 
   const unlockContent = async () => {
     if (!user?.id || !accessToken) return;
-    
+    if (user.isPremium) return;
+
     try {
       await updatePremiumStatus(accessToken, user.id, true);
       await refreshUser();
@@ -45,7 +46,8 @@ export function PremiumProvider({ children }: { children: ReactNode }) {
 
   const unlockAll = async () => {
     if (!user?.id || !accessToken) return;
-    
+    if (user.isPremium) return;
+
     try {
       await updatePremiumStatus(accessToken, user.id, true);
       await refreshUser();

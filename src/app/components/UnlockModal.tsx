@@ -2,6 +2,13 @@ import { useState } from 'react';
 import { X, Check, Sparkles } from 'lucide-react';
 import { usePremium } from '../contexts/PremiumContext';
 import { useAuth } from '../contexts/AuthContext';
+import { createPremiumOrder, verifyPremiumPayment } from '../lib/supabase';
+
+declare global {
+  interface Window {
+    Razorpay?: any;
+  }
+}
 
 type UnlockModalProps = {
   isOpen: boolean;
@@ -10,6 +17,12 @@ type UnlockModalProps = {
   contentType: 'eligibilityPlanner' | 'paperworkGuides' | 'medicalResources' | 'examPrep' | 'schoolDatabase';
   title: string;
   features: string[];
+};
+
+type RazorpayResponse = {
+  razorpay_order_id: string;
+  razorpay_payment_id: string;
+  razorpay_signature: string;
 };
 
 export default function UnlockModal({ isOpen, onClose, onUnlockSuccess, title }: UnlockModalProps) {
@@ -46,9 +59,29 @@ export default function UnlockModal({ isOpen, onClose, onUnlockSuccess, title }:
     }, 1200);
   };
 
+  const loadRazorpayScript = async () => {
+    if (window.Razorpay) return;
+    await new Promise<void>((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+      script.async = true;
+      script.onload = () => resolve();
+      script.onerror = () => reject(new Error('Failed to load Razorpay SDK'));
+      document.body.appendChild(script);
+    });
+  };
+
+  const isAlreadyPremium = user?.isPremium;
+
   const handleUnlock = async () => {
     if (!accessToken || !user) {
       setError('Please sign in to unlock premium features.');
+      return;
+    }
+
+    if (isAlreadyPremium) {
+      setError('You are already a premium member. No payment needed.');
+      setIsUnlocking(false);
       return;
     }
 
@@ -56,9 +89,43 @@ export default function UnlockModal({ isOpen, onClose, onUnlockSuccess, title }:
     setIsUnlocking(true);
 
     try {
-      await completeUnlock();
-    } catch (unlockError) {
-      setError(unlockError instanceof Error ? unlockError.message : 'Unable to unlock premium features.');
+      const order = await createPremiumOrder(accessToken);
+      await loadRazorpayScript();
+
+      const options = {
+        key: order.keyId,
+        amount: order.amount,
+        currency: order.currency,
+        name: 'TakeOff Premium',
+        description: 'Unlock all premium content',
+        order_id: order.orderId,
+        handler: async (response: RazorpayResponse) => {
+          try {
+            await verifyPremiumPayment(accessToken, response);
+            await completeUnlock();
+          } catch (verifyError) {
+            setError(verifyError instanceof Error ? verifyError.message : 'Payment verification failed.');
+            setIsUnlocking(false);
+          }
+        },
+        prefill: {
+          name: user.name,
+          email: user.email,
+        },
+        theme: {
+          color: '#4094f4',
+        },
+      };
+
+      const rzp = new window.Razorpay(options);
+      rzp.on('payment.failed', (failure: { error: { description: string } }) => {
+        setError(`Payment failed: ${failure.error?.description ?? 'Try again.'}`);
+        setIsUnlocking(false);
+      });
+
+      rzp.open();
+    } catch (paymentError) {
+      setError(paymentError instanceof Error ? paymentError.message : 'Unable to initiate payment at the moment.');
       setIsUnlocking(false);
     }
   };
@@ -80,8 +147,12 @@ export default function UnlockModal({ isOpen, onClose, onUnlockSuccess, title }:
               <div className="bg-gradient-to-br from-[#4094f4] to-blue-600 rounded-2xl w-20 h-20 flex items-center justify-center mx-auto mb-4">
                 <Sparkles className="w-10 h-10 text-white" />
               </div>
-              <h2 className="font-['Inter',sans-serif] font-bold text-2xl text-black mb-2">{title}</h2>
-              <p className="text-[#626262] font-['Inter',sans-serif]">Get instant access to premium content</p>
+              <h2 className="font-['Inter',sans-serif] font-bold text-2xl text-black mb-2">{isAlreadyPremium ? 'Premium already active' : title}</h2>
+              <p className="text-[#626262] font-['Inter',sans-serif]">
+                {isAlreadyPremium
+                  ? 'Your premium access is already active. Enjoy all premium content without additional payment.'
+                  : 'Get instant access to premium content'}
+              </p>
             </div>
 
             <div className="space-y-3 mb-8">
@@ -100,13 +171,18 @@ export default function UnlockModal({ isOpen, onClose, onUnlockSuccess, title }:
 
             <button
               onClick={handleUnlock}
-              disabled={isUnlocking}
+              disabled={isUnlocking || isAlreadyPremium}
               className="w-full bg-black text-white py-4 rounded-full font-['Inter',sans-serif] font-bold text-lg hover:bg-[#4094f4] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {isUnlocking ? (
                 <>
                   <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                   Processing...
+                </>
+              ) : isAlreadyPremium ? (
+                <>
+                  <Check className="w-5 h-5" />
+                  Already Premium
                 </>
               ) : (
                 <>
