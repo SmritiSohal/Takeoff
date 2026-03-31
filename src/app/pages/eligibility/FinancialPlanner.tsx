@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import ModuleLayout from '../../components/ModuleLayout';
-import { Calculator, TrendingUp, Calendar, IndianRupee, Download, ArrowLeft } from 'lucide-react';
+import { Calculator, TrendingUp, Calendar, IndianRupee, ArrowLeft } from 'lucide-react';
 
 export default function FinancialPlanner() {
   const navigate = useNavigate();
@@ -9,32 +9,32 @@ export default function FinancialPlanner() {
 
   const costBreakdownIndia = [
     { category: 'Computer Number & Registration', amount: 5000 },
-    { category: 'Class 2 Medical', amount: 6000 },
-    { category: 'Ground Classes', amount: 80000 },
-    { category: 'DGCA Exam Fees (5 subjects)', amount: 12500 },
-    { category: 'Flying Training (200+ hours)', amount: 2200000 },
-    { category: 'Class 1 Medical', amount: 20000 },
-    { category: 'Books & Study Material', amount: 25000 },
-    { category: 'Miscellaneous', amount: 51500 }
+    { category: 'Class 2 Medical', amount: 8000 },
+    { category: 'Ground School (Theory Classes)', amount: 75000 },
+    { category: 'DGCA Exam Fees (5 subjects @ ₹2,500 each)', amount: 12500 },
+    { category: 'Flying Training (200+ hours)', amount: 4500000 },
+    { category: 'Class 1 Medical', amount: 18000 },
+    { category: 'Books & Study Material', amount: 28000 },
+    { category: 'Miscellaneous', amount: 53500 }
   ];
 
   const costBreakdownAbroad = [
     { category: 'Computer Number & Registration', amount: 5000 },
-    { category: 'Class 2 Medical (India)', amount: 6000 },
-    { category: 'Visa & Travel', amount: 150000 },
-    { category: 'Flying Training (FAA CPL)', amount: 3500000 },
-    { category: 'Accommodation (12-15 months)', amount: 600000 },
-    { category: 'Living Expenses', amount: 400000 },
-    { category: 'License Conversion to DGCA', amount: 100000 },
-    { category: 'Books & Materials', amount: 50000 },
-    { category: 'Miscellaneous', amount: 189000 }
+    { category: 'Class 2 Medical (India, pre-departure)', amount: 8000 },
+    { category: 'M-1 Visa, SEVIS Fee & Flights', amount: 150000 },
+    { category: 'Flying Training – FAA PPL + IR + CPL', amount: 5000000 },
+    { category: 'Accommodation (14–16 months)', amount: 750000 },
+    { category: 'Living Expenses', amount: 500000 },
+    { category: 'FRTOL & DGCA License Conversion', amount: 150000 },
+    { category: 'Books & Materials', amount: 55000 },
+    { category: 'Miscellaneous', amount: 182000 }
   ];
 
   const timeline = [
-    { month: 'Month 1-2', milestone: 'Computer Number & Medical', cost: '₹11,000', details: ['Apply for Computer Number', 'Complete Class 2 Medical', 'Gather required documents'] },
-    { month: 'Month 3-7', milestone: 'Ground Classes & Exams', cost: '₹92,500', details: ['Enroll in ground school', 'Study 5 DGCA subjects', 'Pass all theory exams'] },
-    { month: 'Month 8-22', milestone: 'Flying Training', cost: '₹22,00,000', details: ['Enroll in DGCA approved school', 'Complete 200+ flight hours', 'Cross-country navigation'] },
-    { month: 'Month 23', milestone: 'Class 1 Medical & License', cost: '₹20,000', details: ['Complete Class 1 Medical', 'Final documentation', 'CPL license issue'] }
+    { month: 'Month 1-2', milestone: 'Computer Number & Medical', cost: '₹13,000', details: ['Apply for DGCA Computer Number', 'Complete Class 2 Medical examination', 'Gather required documents & ID proof'] },
+    { month: 'Month 3-8', milestone: 'Ground School & DGCA Exams', cost: '₹87,500', details: ['Enroll in a DGCA-approved ground school', 'Study all 5 theory subjects (Air Navigation, Met, RTR, etc.)', 'Clear all DGCA written exams (multiple attempts if needed)'] },
+    { month: 'Month 9-26', milestone: 'Flying Training (200+ hours)', cost: '₹45,00,000', details: ['Enroll at a DGCA-approved flying school', 'Complete 200 hours total (solo, dual, cross-country)', 'Night flying, instrument time & skill tests'] },
+    { month: 'Month 27', milestone: 'Class 1 Medical & CPL Issue', cost: '₹18,000', details: ['Undergo DGCA Class 1 Medical at empanelled centre', 'Submit CPL application on eGCA portal', 'Receive Commercial Pilot Licence'] }
   ];
 
   const financingOptions = [
@@ -277,20 +277,6 @@ export default function FinancialPlanner() {
           </div>
         </div>
 
-        {/* Download Report */}
-        <div className="bg-gradient-to-br from-[#4094f4] to-blue-600 rounded-[30px] p-8 text-center">
-          <h2 className="font-['Inter',sans-serif] font-bold text-2xl text-white mb-4">
-            Download Your Personalized Financial Plan
-          </h2>
-          <p className="text-white/90 font-['Inter',sans-serif] mb-6 max-w-2xl mx-auto">
-            Get a PDF report with detailed cost breakdowns, payment schedules, and financing options
-            tailored to your selected training path.
-          </p>
-          <button className="bg-white text-[#4094f4] px-8 py-4 rounded-full font-['Inter',sans-serif] font-bold inline-flex items-center gap-3 hover:bg-gray-100 transition-colors">
-            <Download className="w-5 h-5" />
-            Download PDF Report
-          </button>
-        </div>
       </div>
     </ModuleLayout>
   );

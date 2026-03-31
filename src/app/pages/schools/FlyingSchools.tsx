@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router';
 import ModuleLayout from '../../components/ModuleLayout';
 import UnlockModal from '../../components/UnlockModal';
 import { usePremium } from '../../contexts/PremiumContext';
-import { Plane, MapPin, DollarSign, Clock, Eye, Lock, ArrowRight } from 'lucide-react';
+import { Plane, MapPin, DollarSign, Clock, Lock, ArrowRight } from 'lucide-react';
 
 export default function FlyingSchools() {
   const navigate = useNavigate();
@@ -79,40 +79,40 @@ export default function FlyingSchools() {
 
   const featuredSchools = [
     {
-      name: "Government Flying Training School",
-      location: "Gondia, Maharashtra",
+      name: "IGRUA – Indira Gandhi Rashtriya Uran Akademi",
+      location: "Fursatganj, Uttar Pradesh",
       country: "India",
-      fleetSize: "15+ Aircraft",
-      costRange: "Rs. 25-30 Lakhs",
-      duration: "18-24 months",
-      aircraft: "Cessna 152, Cessna 172"
+      fleetSize: "25+ Aircraft",
+      costRange: "Rs. 35-42 Lakhs",
+      duration: "24-30 months",
+      aircraft: "Cessna 172S, Diamond DA42, Beechcraft B58 Baron"
     },
     {
-      name: "National Flying Training Institute",
-      location: "Gondia, Maharashtra",
+      name: "Chimes Aviation Academy",
+      location: "Sagar, Madhya Pradesh",
       country: "India",
       fleetSize: "20+ Aircraft",
-      costRange: "Rs. 28-35 Lakhs",
-      duration: "18-22 months",
+      costRange: "Rs. 40-48 Lakhs",
+      duration: "22-26 months",
       aircraft: "Cessna 152, Cessna 172, Diamond DA40"
     },
     {
-      name: "CAE Oxford Aviation Academy",
-      location: "Gondia, Maharashtra",
-      country: "India",
-      fleetSize: "25+ Aircraft",
-      costRange: "Rs. 35-40 Lakhs",
-      duration: "18-20 months",
-      aircraft: "Diamond DA40, DA42"
+      name: "ATP Flight School",
+      location: "Jacksonville, FL (70+ US locations)",
+      country: "USA",
+      fleetSize: "700+ Aircraft",
+      costRange: "Rs. 44-54 Lakhs",
+      duration: "9-12 months",
+      aircraft: "Cessna 172, Piper Archer, Piper Seminole"
     },
     {
-      name: "Sunrise Aviation",
-      location: "Phoenix, Arizona",
-      country: "USA",
-      fleetSize: "30+ Aircraft",
-      costRange: "Rs. 45-55 Lakhs",
-      duration: "12-15 months",
-      aircraft: "Cessna 172, Piper Archer, Seminole"
+      name: "43 Air School",
+      location: "Port Alfred, Eastern Cape",
+      country: "South Africa",
+      fleetSize: "50+ Aircraft",
+      costRange: "Rs. 28-36 Lakhs",
+      duration: "18-22 months",
+      aircraft: "Cessna 172, Piper PA-34 Seneca"
     }
   ];
 
@@ -225,7 +225,7 @@ export default function FlyingSchools() {
           {/* Filter */}
           <div className="flex justify-center mb-8">
             <div className="inline-flex bg-gray-100 rounded-full p-1">
-              {['all', 'India', 'USA'].map((filter) => (
+              {['all', 'India', 'USA', 'South Africa'].map((filter) => (
                 <button
                   key={filter}
                   onClick={() => setSelectedCountry(filter)}
@@ -235,7 +235,7 @@ export default function FlyingSchools() {
                       : 'text-gray-600 hover:text-black'
                   }`}
                 >
-                  {filter === 'all' ? 'All' : filter === 'USA' ? 'Abroad' : filter}
+                  {filter === 'all' ? 'All' : filter}
                 </button>
               ))}
             </div>
@@ -285,13 +285,9 @@ export default function FlyingSchools() {
                 </div>
 
                 <div className="mt-4 pt-4 border-t border-gray-100">
-                  <p className="text-xs text-[#626262] font-['Inter',sans-serif] mb-3">
+                  <p className="text-xs text-[#626262] font-['Inter',sans-serif]">
                     <span className="font-semibold text-black">Aircraft:</span> {school.aircraft}
                   </p>
-                  <button className="w-full bg-black text-white px-4 py-2.5 rounded-full hover:bg-gray-800 transition-colors font-['Inter',sans-serif] font-medium text-sm flex items-center justify-center gap-2">
-                    <Eye className="w-4 h-4" />
-                    View Details
-                  </button>
                 </div>
               </div>
             ))}

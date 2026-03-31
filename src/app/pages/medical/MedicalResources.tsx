@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router';
 import ModuleLayout from '../../components/ModuleLayout';
-import { MapPin, Phone, Mail, Globe, ArrowLeft, Search } from 'lucide-react';
+import { MapPin, Phone, Mail, Globe, ArrowLeft, Search, Filter, Download } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { fetchMedicalCenters } from '../../lib/supabase';
 
@@ -21,6 +21,7 @@ export default function MedicalResources() {
   const { accessToken } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCity, setSelectedCity] = useState('all');
+  const [selectedCenterType, setSelectedCenterType] = useState('all');
   const [centers, setCenters] = useState<MedicalCenter[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -44,14 +45,16 @@ export default function MedicalResources() {
   }, [accessToken]);
 
   const cities = useMemo(() => ['all', ...Array.from(new Set(centers.map((c) => c.location)))], [centers]);
+  const centerTypes = useMemo(() => ['all', ...Array.from(new Set(centers.map((c) => c.center_type).filter(Boolean)))], [centers]);
 
   const filtered = centers.filter((center) => {
     const cityMatch = selectedCity === 'all' || center.location === selectedCity;
+    const typeMatch = selectedCenterType === 'all' || center.center_type === selectedCenterType;
     const searchMatch =
       searchTerm === '' ||
       center.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       center.location.toLowerCase().includes(searchTerm.toLowerCase());
-    return cityMatch && searchMatch;
+    return cityMatch && typeMatch && searchMatch;
   });
 
   return (
@@ -65,9 +68,28 @@ export default function MedicalResources() {
           Back to Medical Guidance
         </button>
 
+        {/* Class 1 Medical Instructions Download */}
+        <div className="bg-gradient-to-br from-[#4094f4] to-blue-600 rounded-[30px] p-8 text-center">
+          <h2 className="font-['Inter',sans-serif] font-bold text-2xl text-white mb-4">
+            DGCA Class 1 Medical – Official Instructions
+          </h2>
+          <p className="text-white/90 font-['Inter',sans-serif] mb-6 max-w-2xl mx-auto">
+            Download the official DGCA circular covering the complete Class 1 medical process — reporting timings,
+            documents to carry, all required tests by age group, and the step-by-step eGCA application procedure.
+          </p>
+          <a
+            href="/class1-medical-instructions.pdf"
+            download="DGCA Class 1 Medical Instructions.pdf"
+            className="bg-white text-[#4094f4] px-8 py-4 rounded-full font-['Inter',sans-serif] font-bold inline-flex items-center gap-3 hover:bg-gray-100 transition-colors"
+          >
+            <Download className="w-5 h-5" />
+            Download Class 1 Medical Guide (PDF)
+          </a>
+        </div>
+
         <div className="bg-white rounded-[30px] p-8 md:p-10">
-          <div className="flex flex-col md:flex-row gap-4 mb-8">
-            <div className="flex-1 relative">
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-4 mb-8">
+            <div className="md:col-span-6 relative">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
               <input
                 type="text"
@@ -77,18 +99,33 @@ export default function MedicalResources() {
                 className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-full font-['Inter',sans-serif] focus:border-[#4094f4] outline-none transition-colors"
               />
             </div>
-            <div className="flex gap-2 overflow-x-auto pb-1">
-              {cities.map((city) => (
-                <button
-                  key={city}
-                  onClick={() => setSelectedCity(city)}
-                  className={`px-6 py-3 rounded-full font-['Inter',sans-serif] font-medium whitespace-nowrap transition-colors ${
-                    selectedCity === city ? 'bg-black text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                  }`}
-                >
-                  {city === 'all' ? 'All Cities' : city}
-                </button>
-              ))}
+            <div className="md:col-span-3 relative">
+              <Filter className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <select
+                value={selectedCity}
+                onChange={(e) => setSelectedCity(e.target.value)}
+                className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-full font-['Inter',sans-serif] focus:border-[#4094f4] outline-none transition-colors bg-white"
+              >
+                {cities.map((city) => (
+                  <option key={city} value={city}>
+                    {city === 'all' ? 'All Cities' : city}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="md:col-span-3 relative">
+              <Filter className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <select
+                value={selectedCenterType}
+                onChange={(e) => setSelectedCenterType(e.target.value)}
+                className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-full font-['Inter',sans-serif] focus:border-[#4094f4] outline-none transition-colors bg-white"
+              >
+                {centerTypes.map((type) => (
+                  <option key={type} value={type}>
+                    {type === 'all' ? 'All Center Types' : type}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
 
