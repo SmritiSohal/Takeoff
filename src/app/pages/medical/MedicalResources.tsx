@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router';
 import ModuleLayout from '../../components/ModuleLayout';
-import { MapPin, Phone, Mail, Globe, ArrowLeft, Search, Filter } from 'lucide-react';
+import { MapPin, Phone, Mail, Globe, ArrowLeft, Search, Filter, Download } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { fetchMedicalCenters } from '../../lib/supabase';
 
@@ -67,6 +67,25 @@ export default function MedicalResources() {
           <ArrowLeft className="w-5 h-5" />
           Back to Medical Guidance
         </button>
+
+        {/* Class 1 Medical Instructions Download */}
+        <div className="bg-gradient-to-br from-[#4094f4] to-blue-600 rounded-[30px] p-8 text-center">
+          <h2 className="font-['Inter',sans-serif] font-bold text-2xl text-white mb-4">
+            DGCA Class 1 Medical – Official Instructions
+          </h2>
+          <p className="text-white/90 font-['Inter',sans-serif] mb-6 max-w-2xl mx-auto">
+            Download the official DGCA circular covering the complete Class 1 medical process — reporting timings,
+            documents to carry, all required tests by age group, and the step-by-step eGCA application procedure.
+          </p>
+          <a
+            href="/class1-medical-instructions.pdf"
+            download="DGCA Class 1 Medical Instructions.pdf"
+            className="bg-white text-[#4094f4] px-8 py-4 rounded-full font-['Inter',sans-serif] font-bold inline-flex items-center gap-3 hover:bg-gray-100 transition-colors"
+          >
+            <Download className="w-5 h-5" />
+            Download Class 1 Medical Guide (PDF)
+          </a>
+        </div>
 
         <div className="bg-white rounded-[30px] p-8 md:p-10">
           <div className="grid grid-cols-1 md:grid-cols-12 gap-4 mb-8">
