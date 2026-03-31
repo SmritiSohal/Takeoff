@@ -1,4 +1,8 @@
 @import 'tailwindcss' source(none);
 @source '../**/*.{js,ts,jsx,tsx}';
 
+/* Override Tailwind v4's default behaviour of wrapping hover in @media(hover:hover).
+   Without this, hover effects are silently disabled on devices that report hover:none. */
+@custom-variant hover (&:hover);
+
 @import 'tw-animate-css';
