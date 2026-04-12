@@ -132,14 +132,15 @@ export default function UnlockModal({ isOpen, onClose, onUnlockSuccess, title }:
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-[30px] max-w-lg w-full p-8 md:p-10 relative animate-in fade-in duration-300">
+      <div className="bg-white rounded-[30px] max-w-lg w-full relative animate-in fade-in duration-300 max-h-[90vh] flex flex-col">
         <button
           onClick={onClose}
-          className="absolute top-6 right-6 text-gray-400 hover:text-black transition-colors"
+          className="absolute top-6 right-6 text-gray-400 hover:text-black transition-colors z-10"
           disabled={isUnlocking}
         >
           <X className="w-6 h-6" />
         </button>
+      <div className="overflow-y-auto flex-1 p-8 md:p-10">
 
         {!isUnlocked ? (
           <>
@@ -200,6 +201,7 @@ export default function UnlockModal({ isOpen, onClose, onUnlockSuccess, title }:
             <h3 className="font-['Inter',sans-serif] font-bold text-2xl text-black mb-2">Unlocked Successfully!</h3>
           </div>
         )}
+      </div>
       </div>
     </div>
   );
