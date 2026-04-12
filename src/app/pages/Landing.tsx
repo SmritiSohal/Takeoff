@@ -45,7 +45,7 @@ export default function Landing() {
   return (
     <div className="relative w-full min-h-screen">
       {/* Desktop Landing Page */}
-      <div className="hidden md:block w-full">
+      <div className="hidden md:block w-full [overflow-x:clip]">
         <TakeOff onNavigate={(path) => navigate(path)} />
       </div>
       
@@ -158,7 +158,7 @@ export default function Landing() {
               d="M13 7l5 5m0 0l-5 5m5-5H6"
             />
           </svg>
-          Sign In / Sign Up
+          Sign Up
         </button>
       </div>
     </div>
