@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router';
 import ModuleLayout from '../../components/ModuleLayout';
-import { BookOpen, FileText, ArrowLeft, Download } from 'lucide-react';
+import { BookOpen, FileText, ArrowLeft, Download, Search, Filter } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { fetchStudyMaterial } from '../../lib/supabase';
 
@@ -22,6 +22,8 @@ export default function ExamPrepResources() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedSubject, setSelectedSubject] = useState<string>('all');
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [searchTerm, setSearchTerm] = useState<string>('');
 
   useEffect(() => {
     const load = async () => {
@@ -41,9 +43,15 @@ export default function ExamPrepResources() {
     load();
   }, [accessToken]);
 
-  const subjects = useMemo(() => ['all', ...Array.from(new Set(materials.map((material) => material.subject)))], [materials]);
+  const subjects = useMemo(() => ['all', ...Array.from(new Set(materials.map((m) => m.subject)))], [materials]);
+  const categories = useMemo(() => ['all', ...Array.from(new Set(materials.map((m) => m.category).filter(Boolean)))], [materials]);
 
-  const visibleMaterials = materials.filter((material) => selectedSubject === 'all' || material.subject === selectedSubject);
+  const visibleMaterials = materials.filter((m) => {
+    const matchSubject = selectedSubject === 'all' || m.subject === selectedSubject;
+    const matchCategory = selectedCategory === 'all' || m.category === selectedCategory;
+    const matchSearch = searchTerm === '' || m.title.toLowerCase().includes(searchTerm.toLowerCase());
+    return matchSubject && matchCategory && matchSearch;
+  });
 
   return (
     <ModuleLayout title="Complete Exam Preparation" subtitle="Live question banks + study materials">
@@ -57,6 +65,35 @@ export default function ExamPrepResources() {
         </button>
 
         <div className="bg-white rounded-[30px] p-8 md:p-10">
+          {/* Search + Category */}
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-4 mb-6">
+            <div className="md:col-span-8 relative">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Search by resource name..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-full font-['Inter',sans-serif] focus:border-[#4094f4] outline-none transition-colors"
+              />
+            </div>
+            <div className="md:col-span-4 relative">
+              <Filter className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <select
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+                className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-full font-['Inter',sans-serif] focus:border-[#4094f4] outline-none transition-colors bg-white"
+              >
+                {categories.map((cat) => (
+                  <option key={cat} value={cat}>
+                    {cat === 'all' ? 'All Categories' : cat}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {/* Subject pills */}
           <div className="flex flex-wrap justify-center gap-3 mb-8">
             {subjects.map((subject) => (
               <button
@@ -115,7 +152,7 @@ export default function ExamPrepResources() {
           {!loading && visibleMaterials.length === 0 && (
             <div className="text-center py-16">
               <BookOpen className="w-10 h-10 text-gray-300 mx-auto mb-3" />
-              <p className="text-[#626262]">No materials found for this subject yet.</p>
+              <p className="text-[#626262]">No materials match your filters.</p>
             </div>
           )}
         </div>
