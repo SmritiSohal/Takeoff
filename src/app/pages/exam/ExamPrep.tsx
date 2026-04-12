@@ -1,15 +1,37 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
 import ModuleLayout from '../../components/ModuleLayout';
 import LockedCard from '../../components/LockedCard';
 import UnlockModal from '../../components/UnlockModal';
 import { usePremium } from '../../contexts/PremiumContext';
-import { BookOpen, Download, Navigation, Cloud, Scale, Cog, ArrowRight } from 'lucide-react';
+import { useAuth } from '../../contexts/AuthContext';
+import { fetchStudyMaterial } from '../../lib/supabase';
+import { BookOpen, Download, Navigation, Cloud, Scale, Cog, ArrowRight, FileText } from 'lucide-react';
+
+type StudyMaterial = {
+  id: number;
+  subject: string;
+  title: string;
+  category: string | null;
+  description: string | null;
+  file_url: string | null;
+  premium: boolean;
+};
 
 export default function ExamPrep() {
   const navigate = useNavigate();
   const { premiumAccess } = usePremium();
+  const { accessToken } = useAuth();
   const [showUnlockModal, setShowUnlockModal] = useState(false);
+  const [freeResources, setFreeResources] = useState<StudyMaterial[]>([]);
+  const [loadingFree, setLoadingFree] = useState(true);
+
+  useEffect(() => {
+    if (!accessToken) return;
+    fetchStudyMaterial(accessToken)
+      .then((rows) => setFreeResources((rows as StudyMaterial[]).filter((m) => !m.premium)))
+      .finally(() => setLoadingFree(false));
+  }, [accessToken]);
   
   const subjects = [
     {
@@ -42,28 +64,6 @@ export default function ExamPrep() {
     }
   ];
 
-  const freeBooks = [
-    {
-      title: "Air Navigation - Fundamentals",
-      author: "DGCA Study Material",
-      size: "12.5 MB"
-    },
-    {
-      title: "Meteorology Basics for Pilots",
-      author: "Aviation Press",
-      size: "8.3 MB"
-    },
-    {
-      title: "DGCA CAR (Civil Aviation Requirements)",
-      author: "Official DGCA Publication",
-      size: "15.7 MB"
-    },
-    {
-      title: "Principles of Flight",
-      author: "Oxford Aviation Academy",
-      size: "10.2 MB"
-    }
-  ];
 
   return (
     <ModuleLayout
@@ -130,10 +130,16 @@ export default function ExamPrep() {
             Download these free study materials to get started with your preparation
           </p>
 
+          {loadingFree && <p className="text-center text-[#626262]">Loading resources...</p>}
+
+          {!loadingFree && freeResources.length === 0 && (
+            <p className="text-center text-[#626262]">No free resources available yet.</p>
+          )}
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {freeBooks.map((book, index) => (
+            {freeResources.map((resource) => (
               <div
-                key={index}
+                key={resource.id}
                 className="flex items-center justify-between bg-gray-50 p-5 rounded-xl hover:bg-gray-100 transition-colors border border-gray-200"
               >
                 <div className="flex items-start gap-4 flex-1">
@@ -142,19 +148,32 @@ export default function ExamPrep() {
                   </div>
                   <div className="flex-1">
                     <h3 className="font-['Inter',sans-serif] font-semibold text-black mb-1">
-                      {book.title}
+                      {resource.title}
                     </h3>
                     <p className="text-sm text-[#626262] font-['Inter',sans-serif]">
-                      {book.author}
+                      {resource.subject}
                     </p>
-                    <p className="text-xs text-gray-400 mt-1">
-                      PDF  {book.size}
-                    </p>
+                    {resource.category && (
+                      <p className="text-xs text-gray-400 mt-1 uppercase tracking-wide">
+                        {resource.category}
+                      </p>
+                    )}
                   </div>
                 </div>
-                <button className="bg-black text-white p-3 rounded-full hover:bg-gray-800 transition-colors shrink-0 ml-4">
-                  <Download className="w-5 h-5" />
-                </button>
+                {resource.file_url ? (
+                  <a
+                    href={resource.file_url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="bg-black text-white p-3 rounded-full hover:bg-gray-800 transition-colors shrink-0 ml-4"
+                  >
+                    <Download className="w-5 h-5" />
+                  </a>
+                ) : (
+                  <span className="bg-gray-100 text-gray-400 p-3 rounded-full shrink-0 ml-4">
+                    <FileText className="w-5 h-5" />
+                  </span>
+                )}
               </div>
             ))}
           </div>
