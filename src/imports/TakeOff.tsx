@@ -144,22 +144,6 @@ export default function TakeOff({ onNavigate }: TakeOffProps) {
           <p className="absolute left-[1013px] top-[89px]">About us</p>
           <p className="absolute left-[1109px] top-[89px]">Sign Up</p>
         </div>
-        <Wrapper2 additionalClassNames="left-[1290px]">
-          <g id="Group 2">
-            <circle cx="22" cy="22" fill="var(--fill-0, white)" id="Ellipse 1" r="22" />
-            <g id="charm:menu-hamburger">
-              <path d={svgPaths.pe0bf000} id="Vector" stroke="var(--stroke-0, black)" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
-            </g>
-          </g>
-        </Wrapper2>
-        <Wrapper2 additionalClassNames="left-[1237px]">
-          <g id="Group 1">
-            <circle cx="22" cy="22" fill="var(--fill-0, white)" id="Ellipse 2" r="22" />
-            <g id="bxs:plane">
-              <path d={svgPaths.pf7ad100} fill="var(--fill-0, black)" id="Vector" />
-            </g>
-          </g>
-        </Wrapper2>
       </div>
       <p className="absolute font-['Inter:Bold',sans-serif] font-bold leading-[normal] left-[909px] not-italic text-[#ebebeb] text-[45.053px] top-[163px] w-[344px] whitespace-pre-wrap">Aviation Tailored To You</p>
       <div className="absolute contents left-[54px] top-[744px]">
