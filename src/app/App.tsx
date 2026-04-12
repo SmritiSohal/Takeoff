@@ -3,6 +3,7 @@ import { router } from './routes';
 import { PremiumProvider } from './contexts/PremiumContext';
 import { AuthProvider } from './contexts/AuthContext';
 import { ErrorBoundary } from './components/ErrorBoundary';
+import { Analytics } from '@vercel/analytics/react';
 
 export default function App() {
   return (
@@ -10,6 +11,7 @@ export default function App() {
       <AuthProvider>
         <PremiumProvider>
           <RouterProvider router={router} />
+          <Analytics />
         </PremiumProvider>
       </AuthProvider>
     </ErrorBoundary>
