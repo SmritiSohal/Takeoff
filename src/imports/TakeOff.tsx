@@ -140,9 +140,9 @@ export default function TakeOff({ onNavigate }: TakeOffProps) {
       <p className="absolute font-['Inter:Extra_Bold',sans-serif] font-extrabold leading-[normal] left-[54px] not-italic text-[198px] text-white top-[60px]">TakeOff</p>
       <div className="absolute contents left-[941px] top-[76px]">
         <div className="absolute contents font-['Inter:Regular',sans-serif] font-normal leading-[normal] left-[941px] not-italic text-[16px] text-black top-[89px]">
-          <p className="absolute left-[941px] top-[89px]">{`Tools `}</p>
-          <p className="absolute left-[1013px] top-[89px]">About us</p>
-          <p className="absolute left-[1109px] top-[89px]">Sign Up</p>
+          <p className="absolute left-[1172px] top-[89px]">{`Tools `}</p>
+          <p className="absolute left-[1244px] top-[89px]">About us</p>
+          <p className="absolute left-[1340px] top-[89px]">Sign Up</p>
         </div>
       </div>
       <p className="absolute font-['Inter:Bold',sans-serif] font-bold leading-[normal] left-[909px] not-italic text-[#ebebeb] text-[45.053px] top-[163px] w-[344px] whitespace-pre-wrap">Aviation Tailored To You</p>
