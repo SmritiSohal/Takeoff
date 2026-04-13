@@ -183,6 +183,23 @@ export function toTakeoffUser(session: SupabaseSession, profile?: { full_name: s
   };
 }
 
+export async function sendPasswordResetEmail(email: string) {
+  const redirectTo = `${window.location.origin}/reset-password`;
+  await request(`/auth/v1/recover?redirect_to=${encodeURIComponent(redirectTo)}`, {
+    method: 'POST',
+    headers: authHeaders(),
+    body: JSON.stringify({ email }),
+  });
+}
+
+export async function updatePassword(accessToken: string, newPassword: string) {
+  await request('/auth/v1/user', {
+    method: 'PUT',
+    headers: authHeaders(accessToken),
+    body: JSON.stringify({ password: newPassword }),
+  });
+}
+
 export async function createPremiumOrder(accessToken: string) {
   return request<{ orderId: string; amount: number; currency: string; keyId: string; profileId: string }>(
     '/functions/v1/create-razorpay-order',

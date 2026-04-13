@@ -3,6 +3,7 @@ import { createBrowserRouter } from 'react-router';
 
 import Landing from './pages/Landing';
 import Auth from './pages/Auth';
+import ResetPassword from './pages/ResetPassword';
 import About from './pages/About';
 import Dashboard from './pages/Dashboard';
 import EligibilityLanding from './pages/eligibility/EligibilityLanding';
@@ -24,6 +25,7 @@ const protectedElement = (component: ReactNode) => <ProtectedRoute>{component}</
 export const router = createBrowserRouter([
   { path: '/', Component: Landing },
   { path: '/auth', Component: Auth },
+  { path: '/reset-password', Component: ResetPassword },
   { path: '/about', Component: About },
   { path: '/dashboard', element: protectedElement(<Dashboard />) },
   { path: '/eligibility', element: protectedElement(<EligibilityLanding />) },
