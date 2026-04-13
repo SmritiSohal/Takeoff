@@ -1,10 +1,13 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import { useAuth } from '../contexts/AuthContext';
-import { Plane, Lock, Mail, User, CheckCircle2, BookOpen, FileText, Stethoscope, GraduationCap, Building2 } from 'lucide-react';
+import { sendPasswordResetEmail } from '../lib/supabase';
+import { Plane, Lock, Mail, User, CheckCircle2, BookOpen, FileText, Stethoscope, GraduationCap, Building2, ArrowLeft } from 'lucide-react';
+
+type View = 'signin' | 'signup' | 'forgot' | 'forgot-sent';
 
 export default function Auth() {
-  const [isSignUp, setIsSignUp] = useState(false);
+  const [view, setView] = useState<View>('signin');
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -12,6 +15,22 @@ export default function Auth() {
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
   const { signIn, signUp } = useAuth();
+
+  const isSignUp = view === 'signup';
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+    try {
+      await sendPasswordResetEmail(email);
+      setView('forgot-sent');
+    } catch {
+      setError('Could not send reset email. Please check the address and try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -129,6 +148,65 @@ export default function Auth() {
               <h1 className="text-2xl font-bold text-black">TakeOff</h1>
             </div>
 
+            {/* Forgot password — send email */}
+            {(view === 'forgot' || view === 'forgot-sent') ? (
+              <>
+                <button
+                  type="button"
+                  onClick={() => { setError(null); setEmail(''); setView('signin'); }}
+                  className="flex items-center gap-1 text-gray-500 hover:text-black text-sm mb-6 transition-colors"
+                >
+                  <ArrowLeft className="w-4 h-4" /> Back to Sign In
+                </button>
+
+                {view === 'forgot-sent' ? (
+                  <div className="text-center py-4">
+                    <div className="bg-green-100 rounded-full w-20 h-20 flex items-center justify-center mx-auto mb-5">
+                      <Mail className="w-10 h-10 text-green-600" />
+                    </div>
+                    <h2 className="text-2xl font-bold text-black mb-2">Check your inbox</h2>
+                    <p className="text-gray-600 mb-6">
+                      We've sent a password reset link to <span className="font-semibold text-black">{email}</span>. Click the link in the email to set a new password.
+                    </p>
+                    <p className="text-sm text-gray-400">Didn't receive it? Check your spam folder or{' '}
+                      <button type="button" onClick={() => setView('forgot')} className="text-[#4094f4] hover:underline">try again</button>.
+                    </p>
+                  </div>
+                ) : (
+                  <>
+                    <div className="text-center mb-8">
+                      <h2 className="text-3xl font-bold text-black mb-2">Forgot Password</h2>
+                      <p className="text-gray-600">Enter your email and we'll send you a reset link</p>
+                    </div>
+                    <form onSubmit={handleForgotPassword} className="space-y-5">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
+                        <div className="relative">
+                          <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                          <input
+                            type="email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-full focus:border-[#4094f4] focus:outline-none transition-colors"
+                            placeholder="Enter your email"
+                            required
+                          />
+                        </div>
+                      </div>
+                      {error && <p className="text-sm text-red-600 text-center">{error}</p>}
+                      <button
+                        type="submit"
+                        disabled={loading}
+                        className="w-full bg-black text-white py-4 rounded-full font-semibold hover:bg-[#4094f4] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {loading ? 'Sending...' : 'Send Reset Link'}
+                      </button>
+                    </form>
+                  </>
+                )}
+              </>
+            ) : (
+            <>
             <div className="text-center mb-8">
               <h2 className="text-3xl font-bold text-black mb-2">
                 {isSignUp ? 'Create Account' : 'Welcome Back'}
@@ -202,6 +280,7 @@ export default function Auth() {
                   </label>
                   <button
                     type="button"
+                    onClick={() => { setError(null); setView('forgot'); }}
                     className="text-[#4094f4] hover:underline font-medium"
                   >
                     Forgot password?
@@ -229,10 +308,11 @@ export default function Auth() {
                 {isSignUp ? 'Already have an account?' : "Don't have an account?"}{' '}
                 <button
                   onClick={() => {
-                    setIsSignUp(!isSignUp);
+                    setView(isSignUp ? 'signin' : 'signup');
                     setName('');
                     setEmail('');
                     setPassword('');
+                    setError(null);
                   }}
                   className="text-[#4094f4] font-semibold hover:underline"
                 >
@@ -240,6 +320,8 @@ export default function Auth() {
                 </button>
               </p>
             </div>
+            </>
+            )}
 
             {/* Mobile Benefits Summary */}
             <div className="lg:hidden mt-6 pt-6 border-t border-gray-200">
