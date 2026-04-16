@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router';
+import { useNavigate, useLocation } from 'react-router';
 import { useAuth } from '../contexts/AuthContext';
 import { sendPasswordResetEmail } from '../lib/supabase';
 import { Plane, Lock, Mail, User, CheckCircle2, BookOpen, FileText, Stethoscope, GraduationCap, Building2, ArrowLeft } from 'lucide-react';
@@ -14,6 +14,8 @@ export default function Auth() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
+  const location = useLocation();
+  const from = (location.state as { from?: string } | null)?.from || '/dashboard';
   const { signIn, signUp } = useAuth();
 
   const isSignUp = view === 'signup';
@@ -43,7 +45,7 @@ export default function Auth() {
       } else {
         await signIn(email, password);
       }
-      navigate('/dashboard');
+      navigate(from, { replace: true });
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Authentication failed. Please try again.';
       setError(message);

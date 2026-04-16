@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { X, Check, Sparkles } from 'lucide-react';
 import { usePremium } from '../contexts/PremiumContext';
 import { useAuth } from '../contexts/AuthContext';
+import { useNavigate, useLocation } from 'react-router';
 import { createPremiumOrder, verifyPremiumPayment } from '../lib/supabase';
 
 declare global {
@@ -28,6 +29,8 @@ type RazorpayResponse = {
 export default function UnlockModal({ isOpen, onClose, onUnlockSuccess, title }: UnlockModalProps) {
   const { unlockContent } = usePremium();
   const { accessToken, user } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
   const [isUnlocking, setIsUnlocking] = useState(false);
   const [isUnlocked, setIsUnlocked] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -75,7 +78,8 @@ export default function UnlockModal({ isOpen, onClose, onUnlockSuccess, title }:
 
   const handleUnlock = async () => {
     if (!accessToken || !user) {
-      setError('Please sign in to unlock premium features.');
+      onClose();
+      navigate('/auth', { state: { from: location.pathname } });
       return;
     }
 
