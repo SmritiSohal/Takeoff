@@ -27,9 +27,9 @@ export default function ExamPrep() {
   const [loadingFree, setLoadingFree] = useState(true);
 
   useEffect(() => {
-    if (!accessToken) return;
     fetchStudyMaterial(accessToken)
       .then((rows) => setFreeResources((rows as StudyMaterial[]).filter((m) => !m.premium)))
+      .catch(() => setFreeResources([]))
       .finally(() => setLoadingFree(false));
   }, [accessToken]);
   
