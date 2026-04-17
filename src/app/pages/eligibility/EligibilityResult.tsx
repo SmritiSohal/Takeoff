@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import ModuleLayout from '../../components/ModuleLayout';
 import LockedCard from '../../components/LockedCard';
+import UnlockModal from '../../components/UnlockModal';
+import { usePremium } from '../../contexts/PremiumContext';
 import { CheckCircle, XCircle, ArrowRight } from 'lucide-react';
 
 interface EligibilityData {
@@ -13,8 +15,18 @@ interface EligibilityData {
 
 export default function EligibilityResult() {
   const navigate = useNavigate();
+  const { premiumAccess } = usePremium();
   const [isEligible, setIsEligible] = useState(true);
   const [eligibilityData, setEligibilityData] = useState<EligibilityData | null>(null);
+  const [showUnlockModal, setShowUnlockModal] = useState(false);
+
+  const handlePlannerClick = () => {
+    if (premiumAccess.eligibilityPlanner) {
+      navigate('/eligibility/financial-planner');
+    } else {
+      setShowUnlockModal(true);
+    }
+  };
 
   useEffect(() => {
     const data = sessionStorage.getItem('eligibilityData');
@@ -198,18 +210,51 @@ export default function EligibilityResult() {
           </div>
         </div>
 
-        {/* Locked Section */}
-        <div className="bg-white/10 rounded-[30px] p-8">
-          <h2 className="font-['Inter',sans-serif] font-bold text-2xl text-white text-center mb-6">
-            Premium Planning Tools
-          </h2>
-          <LockedCard
-            title="Detailed Financial & Timeline Planner"
-            description="Get a detailed PDF with month-by-month breakdown, complete cost estimates for India and abroad, financing options, scholarship information, and realistic timelines."
-            ctaText="Unlock Detailed Planner"
-          />
-        </div>
+        {/* Locked / Unlocked Planner Section */}
+        {premiumAccess.eligibilityPlanner ? (
+          <div className="bg-white rounded-[30px] p-8 text-center">
+            <h2 className="font-['Inter',sans-serif] font-bold text-2xl text-black mb-4">
+              ✨ Premium Access Unlocked
+            </h2>
+            <p className="text-[#626262] font-['Inter',sans-serif] mb-6">
+              Your Financial & Timeline Planner is ready with full cost breakdowns and month-by-month planning.
+            </p>
+            <button
+              onClick={() => navigate('/eligibility/financial-planner')}
+              className="bg-[#4094f4] text-white px-8 py-4 rounded-full font-['Inter',sans-serif] font-bold hover:bg-blue-600 transition-colors inline-flex items-center gap-2"
+            >
+              Open Financial Planner
+              <ArrowRight className="w-5 h-5" />
+            </button>
+          </div>
+        ) : (
+          <div className="bg-white/10 rounded-[30px] p-8">
+            <h2 className="font-['Inter',sans-serif] font-bold text-2xl text-white text-center mb-6">
+              Premium Planning Tools
+            </h2>
+            <LockedCard
+              title="Detailed Financial & Timeline Planner"
+              description="Get a month-by-month breakdown, complete cost estimates for India and abroad, financing options, scholarship information, and realistic timelines."
+              ctaText="Unlock Detailed Planner"
+              onClick={handlePlannerClick}
+            />
+          </div>
+        )}
       </div>
+
+      <UnlockModal
+        isOpen={showUnlockModal}
+        onClose={() => setShowUnlockModal(false)}
+        onUnlockSuccess={() => navigate('/eligibility/financial-planner')}
+        contentType="eligibilityPlanner"
+        title="Unlock Financial & Timeline Planner"
+        features={[
+          'Month-by-month cost breakdown for India and abroad',
+          'Financing options and scholarship information',
+          'Realistic training timelines',
+          'Personalised planning based on your profile',
+        ]}
+      />
     </ModuleLayout>
   );
 }
