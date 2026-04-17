@@ -145,6 +145,15 @@ export async function fetchSchools(accessToken: string) {
   );
 }
 
+export async function fetchFeaturedSchools(accessToken?: string | null) {
+  return request<Array<Record<string, unknown>>>(
+    '/rest/v1/schools?select=*&is_featured=eq.true&order=rating.desc.nullslast,name.asc',
+    {
+      headers: authHeaders(accessToken ?? undefined),
+    },
+  );
+}
+
 export async function fetchMedicalCenters(accessToken: string) {
   return request<Array<Record<string, unknown>>>(
     '/rest/v1/medical_centers?select=*&order=location.asc,name.asc',

@@ -1,15 +1,45 @@
-import { useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router';
 import ModuleLayout from '../../components/ModuleLayout';
 import UnlockModal from '../../components/UnlockModal';
 import { usePremium } from '../../contexts/PremiumContext';
+import { useAuth } from '../../contexts/AuthContext';
+import { fetchFeaturedSchools } from '../../lib/supabase';
 import { Plane, MapPin, DollarSign, Clock, Lock, ArrowRight } from 'lucide-react';
+
+type School = {
+  id: number;
+  name: string;
+  location: string;
+  country: string;
+  fleet_size: number | null;
+  estimated_cost_inr: number | null;
+  duration_months: number | null;
+  multi_engine_available: boolean;
+  rating: number | null;
+  is_featured: boolean;
+};
 
 export default function FlyingSchools() {
   const navigate = useNavigate();
   const { premiumAccess } = usePremium();
+  const { accessToken } = useAuth();
   const [showUnlockModal, setShowUnlockModal] = useState(false);
   const [selectedCountry, setSelectedCountry] = useState<string>('all');
+  const [featuredSchools, setFeaturedSchools] = useState<School[]>([]);
+  const [loadingSchools, setLoadingSchools] = useState(true);
+
+  useEffect(() => {
+    fetchFeaturedSchools(accessToken)
+      .then((rows) => setFeaturedSchools(rows as School[]))
+      .catch(() => setFeaturedSchools([]))
+      .finally(() => setLoadingSchools(false));
+  }, [accessToken]);
+
+  const countryFilters = useMemo(() => {
+    const countries = Array.from(new Set(featuredSchools.map((s) => s.country).filter(Boolean)));
+    return ['all', ...countries];
+  }, [featuredSchools]);
 
   const trainingLocations = [
     {
@@ -77,45 +107,6 @@ export default function FlyingSchools() {
     }
   ];
 
-  const featuredSchools = [
-    {
-      name: "IGRUA – Indira Gandhi Rashtriya Uran Akademi",
-      location: "Fursatganj, Uttar Pradesh",
-      country: "India",
-      fleetSize: "25+ Aircraft",
-      costRange: "Rs. 35-42 Lakhs",
-      duration: "24-30 months",
-      aircraft: "Cessna 172S, Diamond DA42, Beechcraft B58 Baron"
-    },
-    {
-      name: "Chimes Aviation Academy",
-      location: "Sagar, Madhya Pradesh",
-      country: "India",
-      fleetSize: "20+ Aircraft",
-      costRange: "Rs. 40-48 Lakhs",
-      duration: "22-26 months",
-      aircraft: "Cessna 152, Cessna 172, Diamond DA40"
-    },
-    {
-      name: "ATP Flight School",
-      location: "Jacksonville, FL (70+ US locations)",
-      country: "USA",
-      fleetSize: "700+ Aircraft",
-      costRange: "Rs. 44-54 Lakhs",
-      duration: "9-12 months",
-      aircraft: "Cessna 172, Piper Archer, Piper Seminole"
-    },
-    {
-      name: "43 Air School",
-      location: "Port Alfred, Eastern Cape",
-      country: "South Africa",
-      fleetSize: "50+ Aircraft",
-      costRange: "Rs. 28-36 Lakhs",
-      duration: "18-22 months",
-      aircraft: "Cessna 172, Piper PA-34 Seneca"
-    }
-  ];
-
   const databasePreview = [
     { school: "ABC Flying Club", location: "Delhi, India", fleet: "Cessna 152/172", cost: "Rs. 28L", duration: "20 mo", contact: "---" },
     { school: "Sky Pilot Academy", location: "Jaipur, India", fleet: "DA40/DA42", cost: "Rs. 32L", duration: "18 mo", contact: "---" },
@@ -126,7 +117,7 @@ export default function FlyingSchools() {
 
   const filteredSchools = selectedCountry === 'all'
     ? featuredSchools
-    : featuredSchools.filter(school => school.country === selectedCountry);
+    : featuredSchools.filter((s) => s.country === selectedCountry);
 
   return (
     <ModuleLayout
@@ -223,75 +214,91 @@ export default function FlyingSchools() {
           </p>
 
           {/* Filter */}
-          <div className="flex justify-center mb-8">
-            <div className="inline-flex bg-gray-100 rounded-full p-1">
-              {['all', 'India', 'USA', 'South Africa'].map((filter) => (
-                <button
-                  key={filter}
-                  onClick={() => setSelectedCountry(filter)}
-                  className={`px-6 py-2 rounded-full font-['Inter',sans-serif] font-medium text-sm transition-colors ${
-                    selectedCountry === filter
-                      ? 'bg-black text-white'
-                      : 'text-gray-600 hover:text-black'
-                  }`}
-                >
-                  {filter === 'all' ? 'All' : filter}
-                </button>
-              ))}
+          {!loadingSchools && countryFilters.length > 1 && (
+            <div className="flex justify-center mb-8">
+              <div className="inline-flex bg-gray-100 rounded-full p-1 flex-wrap gap-1">
+                {countryFilters.map((filter) => (
+                  <button
+                    key={filter}
+                    onClick={() => setSelectedCountry(filter)}
+                    className={`px-6 py-2 rounded-full font-['Inter',sans-serif] font-medium text-sm transition-colors ${
+                      selectedCountry === filter
+                        ? 'bg-black text-white'
+                        : 'text-gray-600 hover:text-black'
+                    }`}
+                  >
+                    {filter === 'all' ? 'All' : filter}
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Schools Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {filteredSchools.map((school, index) => (
-              <div
-                key={index}
-                className="border-2 border-gray-200 rounded-2xl p-6 hover:border-[#4094f4] transition-colors"
-              >
-                <div className="flex items-start justify-between mb-4">
-                  <div>
-                    <h3 className="font-['Inter',sans-serif] font-bold text-lg text-black mb-1">
-                      {school.name}
-                    </h3>
-                    <p className="text-sm text-[#626262] font-['Inter',sans-serif] flex items-center gap-1">
-                      <MapPin className="w-4 h-4" />
-                      {school.location}
-                    </p>
+          {loadingSchools ? (
+            <p className="text-center text-[#626262] font-['Inter',sans-serif]">Loading schools...</p>
+          ) : filteredSchools.length === 0 ? (
+            <p className="text-center text-[#626262] font-['Inter',sans-serif]">No featured schools available.</p>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {filteredSchools.map((school) => (
+                <div
+                  key={school.id}
+                  className="border-2 border-gray-200 rounded-2xl p-6 hover:border-[#4094f4] transition-colors"
+                >
+                  <div className="flex items-start justify-between mb-4">
+                    <div>
+                      <h3 className="font-['Inter',sans-serif] font-bold text-lg text-black mb-1">
+                        {school.name}
+                      </h3>
+                      <p className="text-sm text-[#626262] font-['Inter',sans-serif] flex items-center gap-1">
+                        <MapPin className="w-4 h-4" />
+                        {school.location}
+                      </p>
+                    </div>
+                    <span className="bg-blue-50 text-[#4094f4] px-3 py-1 rounded-full text-xs font-['Inter',sans-serif] font-semibold shrink-0 ml-2">
+                      {school.country}
+                    </span>
                   </div>
-                  <span className="bg-blue-50 text-[#4094f4] px-3 py-1 rounded-full text-xs font-['Inter',sans-serif] font-semibold">
-                    {school.country}
-                  </span>
-                </div>
 
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2 text-sm">
-                    <Plane className="w-4 h-4 text-gray-400" />
-                    <span className="font-['Inter',sans-serif] font-medium text-[#626262]">
-                      Fleet: {school.fleetSize}
-                    </span>
+                  <div className="space-y-3">
+                    {school.fleet_size != null && (
+                      <div className="flex items-center gap-2 text-sm">
+                        <Plane className="w-4 h-4 text-gray-400" />
+                        <span className="font-['Inter',sans-serif] font-medium text-[#626262]">
+                          Fleet: {school.fleet_size}+ Aircraft
+                        </span>
+                      </div>
+                    )}
+                    {school.estimated_cost_inr != null && (
+                      <div className="flex items-center gap-2 text-sm">
+                        <DollarSign className="w-4 h-4 text-gray-400" />
+                        <span className="font-['Inter',sans-serif] font-medium text-[#626262]">
+                          Est. Cost: ₹{(school.estimated_cost_inr / 100000).toFixed(0)} Lakhs
+                        </span>
+                      </div>
+                    )}
+                    {school.duration_months != null && (
+                      <div className="flex items-center gap-2 text-sm">
+                        <Clock className="w-4 h-4 text-gray-400" />
+                        <span className="font-['Inter',sans-serif] font-medium text-[#626262]">
+                          Duration: {school.duration_months} months
+                        </span>
+                      </div>
+                    )}
                   </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <DollarSign className="w-4 h-4 text-gray-400" />
-                    <span className="font-['Inter',sans-serif] font-medium text-[#626262]">
-                      Cost: {school.costRange}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm">
-                    <Clock className="w-4 h-4 text-gray-400" />
-                    <span className="font-['Inter',sans-serif] font-medium text-[#626262]">
-                      Duration: {school.duration}
-                    </span>
-                  </div>
-                </div>
 
-                <div className="mt-4 pt-4 border-t border-gray-100">
-                  <p className="text-xs text-[#626262] font-['Inter',sans-serif]">
-                    <span className="font-semibold text-black">Aircraft:</span> {school.aircraft}
-                  </p>
+                  {school.multi_engine_available && (
+                    <div className="mt-4 pt-4 border-t border-gray-100">
+                      <span className="text-xs bg-green-50 text-green-700 px-3 py-1 rounded-full font-['Inter',sans-serif] font-medium">
+                        ✓ Multi-engine training available
+                      </span>
+                    </div>
+                  )}
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Locked Section: Full Database Table */}
