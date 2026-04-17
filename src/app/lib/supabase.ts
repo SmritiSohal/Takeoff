@@ -154,11 +154,11 @@ export async function fetchMedicalCenters(accessToken: string) {
   );
 }
 
-export async function fetchStudyMaterial(accessToken: string) {
+export async function fetchStudyMaterial(accessToken?: string | null) {
   return request<Array<Record<string, unknown>>>(
     '/rest/v1/study_material?select=*&order=subject.asc,title.asc',
     {
-      headers: authHeaders(accessToken),
+      headers: authHeaders(accessToken ?? undefined),
     },
   );
 }
