@@ -192,40 +192,15 @@ export function toTakeoffUser(session: SupabaseSession, profile?: { full_name: s
   };
 }
 
-// ── PKCE helpers ────────────────────────────────────────────────────────────
-function generateCodeVerifier(): string {
-  const array = new Uint8Array(32);
-  crypto.getRandomValues(array);
-  return btoa(String.fromCharCode(...array))
-    .replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
-}
-
-async function generateCodeChallenge(verifier: string): Promise<string> {
-  const data = new TextEncoder().encode(verifier);
-  const digest = await crypto.subtle.digest('SHA-256', data);
-  return btoa(String.fromCharCode(...new Uint8Array(digest)))
-    .replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
-}
-
 export async function sendPasswordResetEmail(email: string) {
   const redirectTo = `${window.location.origin}/reset-password`;
-  const codeVerifier = generateCodeVerifier();
-  const codeChallenge = await generateCodeChallenge(codeVerifier);
-  sessionStorage.setItem('pkce_code_verifier', codeVerifier);
-
+  // Use implicit flow (no PKCE) so Supabase returns the token directly in the
+  // hash fragment — PKCE breaks email-based reset because the code_verifier
+  // stored in the browser is gone by the time the user clicks the link.
   await request(`/auth/v1/recover?redirect_to=${encodeURIComponent(redirectTo)}`, {
     method: 'POST',
     headers: authHeaders(),
-    body: JSON.stringify({ email, code_challenge: codeChallenge, code_challenge_method: 's256' }),
-  });
-}
-
-export async function exchangeRecoveryCode(code: string): Promise<SupabaseSession> {
-  const codeVerifier = sessionStorage.getItem('pkce_code_verifier') ?? '';
-  return request<SupabaseSession>(`/auth/v1/token?grant_type=pkce`, {
-    method: 'POST',
-    headers: authHeaders(),
-    body: JSON.stringify({ auth_code: code, code_verifier: codeVerifier }),
+    body: JSON.stringify({ email }),
   });
 }
 
