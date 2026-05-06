@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
-import { updatePassword } from '../lib/supabase';
+import { updatePassword, exchangeRecoveryCode } from '../lib/supabase';
 import { Plane, Lock, CheckCircle2 } from 'lucide-react';
 
 export default function ResetPassword() {
@@ -13,18 +13,27 @@ export default function ResetPassword() {
   const [done, setDone] = useState(false);
 
   useEffect(() => {
-    // Supabase appends the recovery token as a hash fragment:
-    // #access_token=xxx&refresh_token=xxx&type=recovery
+    // PKCE flow (newer Supabase default): ?code=xxx in query string
+    const searchParams = new URLSearchParams(window.location.search);
+    const code = searchParams.get('code');
+    if (code) {
+      exchangeRecoveryCode(code)
+        .then((session) => setAccessToken(session.access_token))
+        .catch(() => setError('Invalid or expired reset link. Please request a new one.'));
+      return;
+    }
+
+    // Implicit flow (older): #access_token=xxx&type=recovery in hash
     const hash = window.location.hash.slice(1);
     const params = new URLSearchParams(hash);
     const token = params.get('access_token');
     const type = params.get('type');
-
     if (token && type === 'recovery') {
       setAccessToken(token);
-    } else {
-      setError('Invalid or expired reset link. Please request a new one.');
+      return;
     }
+
+    setError('Invalid or expired reset link. Please request a new one.');
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {

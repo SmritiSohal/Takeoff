@@ -82,7 +82,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const result = await signUpWithEmail(email, password, name);
 
     if (!result.session) {
-      throw new Error('Sign in to continue');
+      throw new Error('Account created! Please check your email to confirm your account, then sign in.');
     }
 
     saveSession(result.session);
